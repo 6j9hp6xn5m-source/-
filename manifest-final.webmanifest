@@ -1,0 +1,19 @@
+{
+  "name": "WorkFlow Offline",
+  "short_name": "WorkFlow",
+  "description": "Offline workforce manager with local storage for workers, clients, logs, expenses and reports.",
+  "start_url": "./index-pwa-fixed-download.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f4fbf5",
+  "theme_color": "#2f9e44",
+  "lang": "bg",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
