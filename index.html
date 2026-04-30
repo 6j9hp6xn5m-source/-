@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>WorkFlow Offline</title>
+<style>
+:root{
+  --bg:#f4fbf5;--bg2:#edf7ee;--card:#ffffff;--soft:#f8fcf8;--line:#d8e8da;--line2:#bfd8c2;
+  --text:#173223;--muted:#5c7764;--green:#2f9e44;--green2:#43b85b;--green3:#1f7a35;
+  --red:#d9485f;--orange:#d89b22;--shadow:0 14px 30px rgba(33,86,45,.08);--r:18px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:linear-gradient(180deg,var(--bg),var(--bg2));color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
+body{padding-bottom:84px}
+.hidden{display:none!important}
+.topbar{position:sticky;top:0;z-index:25;display:flex;justify-content:space-between;align-items:center;padding:14px 16px;background:rgba(255,255,255,.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.logo{font-weight:800;font-size:1.25rem;color:var(--green3);display:flex;align-items:center;gap:8px}
+.logo:before{content:"🌿"}
+.icon-btn,.btn,.tab,.mini-btn{border:none;border-radius:14px;background:#fff;color:var(--text);padding:11px 14px;font-weight:700;border:1px solid var(--line2);box-shadow:none}
+.btn-primary{background:linear-gradient(180deg,var(--green),var(--green2));color:#fff;border-color:transparent}
+.btn-danger{background:#fff4f6;color:var(--red);border-color:#f0c2cb}
+.icon-btn{width:44px;height:44px;padding:0;font-size:18px}
+.main{width:min(1180px,calc(100% - 16px));margin:12px auto 20px}
+.page{display:none;animation:f .18s ease}.page.active{display:block}@keyframes f{from{opacity:.6;transform:translateY(4px)}to{opacity:1;transform:none}}
+.section{background:var(--card);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);padding:16px;margin-bottom:14px}
+.sec-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}
+.sec-title{font-size:1.35rem;font-weight:800;color:var(--green3)}
+.sub{color:var(--muted);font-size:.92rem}
+.grid{display:grid;gap:12px}.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:15px}
+.kpi .k{font-size:.82rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}.kpi .v{font-size:1.45rem;font-weight:800;margin-top:6px}
+.input,select,textarea{width:100%;border:1px solid var(--line2);background:#fcfffc;color:var(--text);border-radius:14px;padding:12px 13px;font-size:16px;outline:none}
+textarea{min-height:100px;resize:vertical}
+label{display:block;font-weight:700;font-size:.92rem;margin-bottom:7px}
+.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.span-2{grid-column:span 2}
+.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:16px;background:#fff}
+table{width:100%;border-collapse:collapse;min-width:780px}th,td{padding:12px;border-bottom:1px solid #e5f1e7;text-align:left;vertical-align:top}th{font-size:.78rem;text-transform:uppercase;letter-spacing:.04em;background:#edf7ef;color:#35543f}tr:nth-child(even) td{background:#fbfefb}
+.badge{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:7px 10px;font-size:.8rem;font-weight:800;border:1px solid #d6e8d9;background:#f2faf3}.ok{background:#e8f8ec;color:#24713a}.warn{background:#fff6df;color:#8f6500}.bad{background:#fff1f2;color:#b4233d}
+.tabs-bottom{position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;gap:8px;overflow-x:auto;overflow-y:hidden;white-space:nowrap;padding:10px 10px calc(10px + env(safe-area-inset-bottom));background:rgba(255,255,255,.96);backdrop-filter:blur(12px);border-top:1px solid var(--line);scrollbar-width:none;-webkit-overflow-scrolling:touch}.tabs-bottom::-webkit-scrollbar{display:none}
+.tab{flex:0 0 92px;padding:10px 8px;border-radius:16px;font-size:.82rem;line-height:1.15;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:4px;min-height:58px}.tab.active{background:linear-gradient(180deg,var(--green),var(--green2));color:#fff;border-color:transparent}
+.list{display:grid;gap:12px}.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.push{margin-left:auto}
+.worker-card,.client-card{display:grid;gap:10px}
+.muted{color:var(--muted)}
+.small{font-size:.88rem}.right{text-align:right}.center{text-align:center}
+.empty{padding:28px 14px;text-align:center;color:var(--muted);border:1px dashed #d0e2d2;border-radius:18px;background:#fbfefb}
+.overlay{position:fixed;inset:0;background:rgba(27,44,32,.26);display:none;align-items:flex-end;justify-content:center;z-index:60}.overlay.open{display:flex}
+.modal{width:min(760px,100%);max-height:92vh;background:#fff;border-radius:24px 24px 0 0;overflow:auto;border:1px solid var(--line);box-shadow:0 -10px 30px rgba(0,0,0,.12);padding:16px}
+.modal-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px}.modal-title{font-size:1.1rem;font-weight:800;color:var(--green3)}
+hr{border:none;height:1px;background:#e4efe6;margin:14px 0}
+.timer-bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;padding:14px;border:1px solid var(--line);border-radius:18px;background:#f8fcf8}
+.invoice-box{border:1px solid var(--line);border-radius:16px;padding:16px;background:#fff}.invoice-head{font-size:1.55rem;font-weight:800;color:var(--green3);margin-bottom:10px}.invoice-row{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid #e4efe6}.invoice-total{margin-top:14px;padding:14px;border-radius:16px;background:#edf8ef;font-size:1.12rem;font-weight:800;text-align:right}
+.searchbar{display:grid;grid-template-columns:1fr auto auto;gap:10px;margin-bottom:12px}
+.switch{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid #e4efe6}
+.footer-note{font-size:.84rem;color:var(--muted)}
+@media (max-width:900px){.g4{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:1fr}.g2,.form-grid{grid-template-columns:1fr}.span-2{grid-column:span 1}.searchbar{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="logo" data-i18n="appTitle">WorkFlow</div>
+  <button class="icon-btn" onclick="openModal('settingsModal')" title="Settings">⚙️</button>
+</div>
+
+<div class="main">
+  <section id="page-dashboard" class="page active">
+    <div class="section">
+      <div class="sec-head"><div><div class="sec-title" data-i18n="dashboard">Табло</div><div class="sub" data-i18n="dashboardSub">Офлайн приложение с локално запазване</div></div>
+        <select id="dashMonth" class="input" style="width:auto;max-width:180px" onchange="renderDashboard()"></select>
+      </div>
+      <div class="grid g4" id="kpis"></div>
+    </div>
+
+    <div class="section">
+      <div class="sec-head"><div><div class="sec-title" data-i18n="quickTimer">Бърз таймер</div><div class="sub" data-i18n="quickTimerSub">Старт/стоп с автоматично записване в журнала</div></div></div>
+      <div class="timer-bar">
+        <select id="timerClient" class="input" style="flex:1;min-width:180px"></select>
+        <select id="timerWorker" class="input" style="flex:1;min-width:180px"></select>
+        <input id="timerNote" class="input" style="flex:1;min-width:180px" placeholder="Бележка" />
+        <span id="timerStatus" class="badge">Няма активен таймер</span>
+      </div>
+      <div class="row" style="margin-top:12px">
+        <button class="btn btn-primary" onclick="startTimer()" data-i18n="start">Старт</button>
+        <button class="btn" onclick="stopTimer()" data-i18n="stopSave">Стоп и запази</button>
+      </div>
+    </div>
+
+    <div class="grid g2">
+      <div class="section"><div class="sec-head"><div class="sec-title" data-i18n="recentLogs">Последни записи</div></div><div id="recentLogs"></div></div>
+      <div class="section"><div class="sec-head"><div class="sec-title" data-i18n="recentExpenses">Последни разходи</div></div><div id="recentExpenses"></div></div>
+    </div>
+  </section>
+
+  <section id="page-workers" class="page">
+    <div class="section">
+      <div class="sec-head"><div><div class="sec-title" data-i18n="workers">Работници</div><div class="sub" data-i18n="workersSub">Шефът взима ставката на клиента автоматично</div></div><button class="btn btn-primary" onclick="openWorkerModal()">+ <span data-i18n="add">Добави</span></button></div>
+      <div id="workersList"></div>
+    </div>
+  </section>
+
+  <section id="page-clients" class="page">
+    <div class="section">
+      <div class="sec-head"><div><div class="sec-title" data-i18n="clients">Клиенти</div><div class="sub" data-i18n="clientsSub">Локално пазени сметки, статуси и бележки</div></div><button class="btn btn-primary" onclick="openClientModal()">+ <span data-i18n="add">Добави</span></button></div>
+      <div id="clientsList"></div>
+    </div>
+  </section>
+
+  <section id="page-log" class="page">
+    <div class="section">
+      <div class="sec-head"><div><div class="sec-title" data-i18n="journal">Журнал</div><div class="sub" data-i18n="journalSub">Часове, ставки, бележки и редакция</div></div><button class="btn btn-primary" onclick="openLogModal()">+ <span data-i18n="entry">Запис</span></button></div>
+      <div class="searchbar">
+        <input id="logSearch" class="input" placeholder="Търси по клиент, работник, бележка" oninput="renderLog()" />
+        <input id="logFrom" class="input" type="date" onchange="renderLog()" />
+        <input id="logTo" class="input" type="date" onchange="renderLog()" />
+      </div>
+      <div class="table-wrap"><table><thead><tr><th data-i18n="date">Дата</th><th data-i18n="worker">Работник</th><th data-i18n="client">Клиент</th><th data-i18n="hours">Часове</th><th data-i18n="rates">Ставки</th><th data-i18n="amounts">Суми</th><th data-i18n="note">Бел.</th><th></th></tr></thead><tbody id="logTable"></tbody></table></div>
+    </div>
+  </section>
+
+  <section id="page-expenses" class="page">
+    <div class="section">
+      <div class="sec-head"><div><div class="sec-title" data-i18n="expenses">Разходи</div><div class="sub" data-i18n="expensesSub">Материали и магазински рехнунги</div></div><button class="btn btn-primary" onclick="openExpenseModal()">+ <span data-i18n="expense">Разход</span></button></div>
+      <div class="searchbar">
+        <input id="expSearch" class="input" placeholder="Търси по клиент, описание, бележка" oninput="renderExpenses()" />
+        <input id="expFrom" class="input" type="date" onchange="renderExpenses()" />
+        <input id="expTo" class="input" type="date" onchange="renderExpenses()" />
+      </div>
+      <div class="table-wrap"><table><thead><tr><th data-i18n="date">Дата</th><th data-i18n="client">Клиент</th><th data-i18n="description">Описание</th><th data-i18n="amount">Сума</th><th data-i18n="note">Бел.</th><th></th></tr></thead><tbody id="expTable"></tbody></table></div>
+    </div>
+  </section>
+
+  <section id="page-report" class="page">
+    <div class="section">
+      <div class="sec-head"><div><div class="sec-title" data-i18n="report">Репорт</div><div class="sub" data-i18n="reportSub">Печалба, дължимо, часове и справки</div></div><div class="row"><button class="btn btn-primary" onclick="setReport('clients')" id="repClientsBtn">Клиенти</button><button class="btn" onclick="setReport('workers')" id="repWorkersBtn">Работници</button><button class="btn" onclick="setReport('expenses')" id="repExpBtn">Разходи</button></div></div>
+      <div class="grid g4" id="reportTop"></div>
+      <div id="reportBody" style="margin-top:12px"></div>
+    </div>
+  </section>
+</div>
+
+<div class="tabs-bottom">
+  <button class="tab active" onclick="goPage('dashboard',this)">📊<span data-i18n="dashboard">Табло</span></button>
+  <button class="tab" onclick="goPage('workers',this)">👷<span data-i18n="workers">Работници</span></button>
+  <button class="tab" onclick="goPage('clients',this)">🏢<span data-i18n="clients">Клиенти</span></button>
+  <button class="tab" onclick="goPage('log',this)">📋<span data-i18n="journal">Журнал</span></button>
+  <button class="tab" onclick="goPage('expenses',this)">🧾<span data-i18n="expenses">Разходи</span></button>
+  <button class="tab" onclick="goPage('report',this)">📈<span data-i18n="report">Репорт</span></button>
+</div>
+
+<div class="overlay" id="workerModal"><div class="modal">
+  <div class="modal-head"><div class="modal-title" data-i18n="worker">Работник</div><button class="icon-btn" onclick="closeModal('workerModal')">✕</button></div>
+  <div class="form-grid">
+    <div><label data-i18n="name">Име</label><input id="wName" class="input"></div>
+    <div><label data-i18n="type">Тип</label><select id="wType" class="input" onchange="toggleWorkerRate()"><option value="worker">Работник</option><option value="boss">Шеф</option></select></div>
+    <div id="wRateWrap"><label data-i18n="hourRate">Часова ставка</label><input id="wRate" class="input" type="number" step="0.01" min="0"></div>
+    <div class="span-2"><label data-i18n="note">Бележка</label><textarea id="wNote"></textarea></div>
+  </div>
+  <input id="wId" type="hidden">
+  <div class="row" style="margin-top:14px"><button class="btn btn-primary" onclick="saveWorker()" data-i18n="save">Запази</button><button class="btn" onclick="closeModal('workerModal')" data-i18n="cancel">Отказ</button></div>
+</div></div>
+
+<div class="overlay" id="clientModal"><div class="modal">
+  <div class="modal-head"><div class="modal-title" data-i18n="client">Клиент</div><button class="icon-btn" onclick="closeModal('clientModal')">✕</button></div>
+  <div class="form-grid">
+    <div><label data-i18n="name">Име</label><input id="cName" class="input"></div>
+    <div><label data-i18n="clientRate">Ставка към клиент</label><input id="cRate" class="input" type="number" step="0.01" min="0"></div>
+    <div><label data-i18n="paymentStatus">Статус на плащане</label><select id="cStatus" class="input" onchange="togglePartialWrap()"><option value="unpaid">Неплатено</option><option value="partial">Частично</option><option value="paid">Платено</option></select></div>
+    <div id="partialWrap"><label data-i18n="paidAmount">Платена сума</label><input id="cPartial" class="input" type="number" step="0.01" min="0"></div>
+    <div class="span-2"><label data-i18n="note">Бележка</label><textarea id="cNote"></textarea></div>
+  </div>
+  <input id="cId" type="hidden">
+  <div class="row" style="margin-top:14px"><button class="btn btn-primary" onclick="saveClient()" data-i18n="save">Запази</button><button class="btn" onclick="closeModal('clientModal')" data-i18n="cancel">Отказ</button></div>
+</div></div>
+
+<div class="overlay" id="logModal"><div class="modal">
+  <div class="modal-head"><div class="modal-title" data-i18n="entry">Запис</div><button class="icon-btn" onclick="closeModal('logModal')">✕</button></div>
+  <div class="form-grid">
+    <div><label data-i18n="date">Дата</label><input id="lDate" class="input" type="date"></div>
+    <div><label data-i18n="client">Клиент</label><select id="lClient" class="input" onchange="syncClientRate()"></select></div>
+    <div><label data-i18n="worker">Работник</label><select id="lWorker" class="input" onchange="syncWorkerRate()"></select></div>
+    <div><label data-i18n="clientRate">Ставка клиент</label><input id="lClientRate" class="input" type="number" step="0.01" min="0"></div>
+    <div><label data-i18n="workerRate">Ставка работник</label><input id="lWorkerRate" class="input" type="number" step="0.01" min="0"></div>
+    <div><label data-i18n="hours">Часове</label><input id="lHours" class="input" type="number" step="0.01" min="0"></div>
+    <div><label data-i18n="from">От</label><input id="lFrom" class="input" type="time" onchange="calcHours()"></div>
+    <div><label data-i18n="to">До</label><input id="lTo" class="input" type="time" onchange="calcHours()"></div>
+    <div class="span-2"><label data-i18n="note">Бележка</label><textarea id="lNote"></textarea></div>
+  </div>
+  <input id="lId" type="hidden">
+  <div class="row" style="margin-top:14px"><button class="btn btn-primary" onclick="saveLog()" data-i18n="save">Запази</button><button class="btn" onclick="closeModal('logModal')" data-i18n="cancel">Отказ</button></div>
+</div></div>
+
+<div class="overlay" id="expenseModal"><div class="modal">
+  <div class="modal-head"><div class="modal-title" data-i18n="expense">Разход</div><button class="icon-btn" onclick="closeModal('expenseModal')">✕</button></div>
+  <div class="form-grid">
+    <div><label data-i18n="date">Дата</label><input id="eDate" class="input" type="date"></div>
+    <div><label data-i18n="client">Клиент</label><select id="eClient" class="input"></select></div>
+    <div class="span-2"><label data-i18n="description">Описание</label><input id="eDesc" class="input"></div>
+    <div><label data-i18n="amount">Сума</label><input id="eAmount" class="input" type="number" step="0.01" min="0"></div>
+    <div class="span-2"><label data-i18n="note">Бележка</label><textarea id="eNote"></textarea></div>
+  </div>
+  <input id="eId" type="hidden">
+  <div class="row" style="margin-top:14px"><button class="btn btn-primary" onclick="saveExpense()" data-i18n="save">Запази</button><button class="btn" onclick="closeModal('expenseModal')" data-i18n="cancel">Отказ</button></div>
+</div></div>
+
+<div class="overlay" id="invoiceModal"><div class="modal">
+  <div class="modal-head"><div class="modal-title">📄 <span data-i18n="invoice">Фактура</span></div><button class="icon-btn" onclick="closeModal('invoiceModal')">✕</button></div>
+  <div id="invoiceBox" class="invoice-box"></div>
+  <div class="row" style="margin-top:14px"><button class="btn btn-primary" onclick="printInvoice()">🖨 PDF / Print</button><button class="btn" id="shareInvoiceBtn">📤 Share</button></div>
+</div></div>
+
+<div class="overlay" id="settingsModal"><div class="modal">
+  <div class="modal-head"><div class="modal-title" data-i18n="settings">Настройки</div><button class="icon-btn" onclick="closeModal('settingsModal')">✕</button></div>
+  <div class="switch"><div><div style="font-weight:800" data-i18n="language">Език</div><div class="footer-note" data-i18n="languageSub">Смяна на интерфейса</div></div><select id="langSel" class="input" style="width:auto" onchange="setLang(this.value)"><option value="bg">Български</option><option value="en">English</option><option value="de">Deutsch</option></select></div>
+  <div class="switch"><div><div style="font-weight:800" data-i18n="autoPause">Автоматична пауза</div><div class="footer-note" data-i18n="autoPauseSub">Изважда минути от таймера</div></div><input id="pauseOn" type="checkbox" onchange="saveSettings()"></div>
+  <div style="margin-top:12px"><label data-i18n="pauseMinutes">Минути пауза</label><input id="pauseMin" class="input" type="number" min="0" step="1" onchange="saveSettings()"></div>
+  <hr>
+  <div class="row">
+    <button class="btn" onclick="exportJSON()">⬇️ JSON</button>
+    <button class="btn" onclick="document.getElementById('imp').click()">⬆️ JSON</button>
+    <button class="btn" onclick="exportCSV('logs')">⬇️ CSV Журнал</button>
+    <button class="btn" onclick="exportCSV('expenses')">⬇️ CSV Разходи</button>
+  </div>
+  <input id="imp" type="file" accept="application/json" class="hidden" onchange="importJSON(event)">
+  <hr>
+  <div class="row"><button class="btn btn-danger" onclick="clearAll()" data-i18n="deleteAll">Изтрий всичко</button></div>
+  <p class="footer-note" data-i18n="offlineNote">Всички данни се пазят локално в устройството чрез localStorage. Няма сървър.</p>
+</div></div>
+
+<script>
+const KEY='workflow_offline_v1';
+const TIMER_KEY='workflow_offline_timer_v1';
+const LANG_KEY='workflow_offline_lang_v1';
+let state={workers:[],clients:[],logs:[],expenses:[],settings:{pauseOn:false,pauseMin:30},report:'clients'};
+let currentInvoiceText='';
+const i18n={
+  bg:{appTitle:'WorkFlow',dashboard:'Табло',dashboardSub:'Офлайн приложение с локално запазване',quickTimer:'Бърз таймер',quickTimerSub:'Старт/стоп с автоматично записване в журнала',start:'Старт',stopSave:'Стоп и запази',recentLogs:'Последни записи',recentExpenses:'Последни разходи',workers:'Работници',workersSub:'Шефът взима ставката на клиента автоматично',clients:'Клиенти',clientsSub:'Локално пазени сметки, статуси и бележки',journal:'Журнал',journalSub:'Часове, ставки, бележки и редакция',expenses:'Разходи',expensesSub:'Материали и магазински рехнунги',report:'Репорт',reportSub:'Печалба, дължимо, часове и справки',worker:'Работник',client:'Клиент',entry:'Запис',expense:'Разход',add:'Добави',save:'Запази',cancel:'Отказ',name:'Име',type:'Тип',hourRate:'Часова ставка',clientRate:'Ставка към клиент',workerRate:'Ставка работник',paymentStatus:'Статус на плащане',paidAmount:'Платена сума',note:'Бележка',date:'Дата',hours:'Часове',from:'От',to:'До',description:'Описание',amount:'Сума',rates:'Ставки',amounts:'Суми',invoice:'Фактура',settings:'Настройки',language:'Език',languageSub:'Смяна на интерфейса',autoPause:'Автоматична пауза',autoPauseSub:'Изважда минути от таймера',pauseMinutes:'Минути пауза',deleteAll:'Изтрий всичко',offlineNote:'Всички данни се пазят локално в устройството чрез localStorage. Няма сървър.',unpaid:'Неплатено',partial:'Частично',paid:'Платено',profit:'Печалба',total:'Общо',remaining:'Остава',status:'Статус',noWorkers:'Няма работници',addFirstWorker:'Добави първия работник',noClients:'Няма клиенти',addFirstClient:'Добави първия клиент',noEntries:'Няма записи',noExpenses:'Няма разходи',activeTimer:'Активен таймер',noTimer:'Няма активен таймер'},
+  en:{appTitle:'WorkFlow',dashboard:'Dashboard',dashboardSub:'Offline app with local storage',quickTimer:'Quick timer',quickTimerSub:'Start/stop and save directly to the log',start:'Start',stopSave:'Stop and save',recentLogs:'Recent entries',recentExpenses:'Recent expenses',workers:'Workers',workersSub:'Boss takes the client rate automatically',clients:'Clients',clientsSub:'Local invoices, statuses and notes',journal:'Log',journalSub:'Hours, rates, notes and editing',expenses:'Expenses',expensesSub:'Materials and shop receipts',report:'Report',reportSub:'Profit, due amounts, hours and summaries',worker:'Worker',client:'Client',entry:'Entry',expense:'Expense',add:'Add',save:'Save',cancel:'Cancel',name:'Name',type:'Type',hourRate:'Hourly rate',clientRate:'Client rate',workerRate:'Worker rate',paymentStatus:'Payment status',paidAmount:'Paid amount',note:'Note',date:'Date',hours:'Hours',from:'From',to:'To',description:'Description',amount:'Amount',rates:'Rates',amounts:'Amounts',invoice:'Invoice',settings:'Settings',language:'Language',languageSub:'Switch the interface',autoPause:'Automatic break',autoPauseSub:'Subtract minutes from timer',pauseMinutes:'Break minutes',deleteAll:'Delete all',offlineNote:'All data stays locally on the device using localStorage. No server.',unpaid:'Unpaid',partial:'Partial',paid:'Paid',profit:'Profit',total:'Total',remaining:'Due',status:'Status',noWorkers:'No workers',addFirstWorker:'Add the first worker',noClients:'No clients',addFirstClient:'Add the first client',noEntries:'No entries',noExpenses:'No expenses',activeTimer:'Timer active',noTimer:'No active timer'},
+  de:{appTitle:'WorkFlow',dashboard:'Dashboard',dashboardSub:'Offline-App mit lokaler Speicherung',quickTimer:'Schnell-Timer',quickTimerSub:'Start/Stopp mit automatischem Journaleintrag',start:'Start',stopSave:'Stoppen und speichern',recentLogs:'Letzte Einträge',recentExpenses:'Letzte Ausgaben',workers:'Mitarbeiter',workersSub:'Chef übernimmt automatisch den Kundensatz',clients:'Kunden',clientsSub:'Lokal gespeicherte Rechnungen, Status und Notizen',journal:'Journal',journalSub:'Stunden, Sätze, Notizen und Bearbeitung',expenses:'Ausgaben',expensesSub:'Material und Kassenbelege',report:'Bericht',reportSub:'Gewinn, offene Beträge, Stunden und Auswertungen',worker:'Mitarbeiter',client:'Kunde',entry:'Eintrag',expense:'Ausgabe',add:'Hinzufügen',save:'Speichern',cancel:'Abbrechen',name:'Name',type:'Typ',hourRate:'Stundensatz',clientRate:'Kundensatz',workerRate:'Mitarbeiter-Satz',paymentStatus:'Zahlungsstatus',paidAmount:'Bezahlter Betrag',note:'Notiz',date:'Datum',hours:'Stunden',from:'Von',to:'Bis',description:'Beschreibung',amount:'Betrag',rates:'Sätze',amounts:'Beträge',invoice:'Rechnung',settings:'Einstellungen',language:'Sprache',languageSub:'Oberfläche umschalten',autoPause:'Automatische Pause',autoPauseSub:'Minuten vom Timer abziehen',pauseMinutes:'Pausenminuten',deleteAll:'Alles löschen',offlineNote:'Alle Daten bleiben lokal auf dem Gerät per localStorage. Kein Server.',unpaid:'Unbezahlt',partial:'Teilweise',paid:'Bezahlt',profit:'Gewinn',total:'Gesamt',remaining:'Offen',status:'Status',noWorkers:'Keine Mitarbeiter',addFirstWorker:'Ersten Mitarbeiter hinzufügen',noClients:'Keine Kunden',addFirstClient:'Ersten Kunden hinzufügen',noEntries:'Keine Einträge',noExpenses:'Keine Ausgaben',activeTimer:'Timer aktiv',noTimer:'Kein aktiver Timer'}
+};
+
+function t(k){const l=localStorage.getItem(LANG_KEY)||'bg';return (i18n[l]&&i18n[l][k])||i18n.bg[k]||k}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,8)}
+function money(n){return '€'+Number(n||0).toFixed(2)}
+function save(){localStorage.setItem(KEY,JSON.stringify(state))}
+function load(){try{const d=JSON.parse(localStorage.getItem(KEY)||'null');if(d) state=Object.assign(state,d)}catch(e){}}
+function byId(id){return document.getElementById(id)}
+function openModal(id){byId(id).classList.add('open')}
+function closeModal(id){byId(id).classList.remove('open')}
+function today(){return new Date().toISOString().slice(0,10)}
+function timeHM(d){return new Date(d).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',hour12:false})}
+function initials(s){return String(s||'?').split(' ').map(v=>v[0]||'').join('').slice(0,2).toUpperCase()||'?'}
+function goPage(page,btn){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));byId('page-'+page).classList.add('active');document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));if(btn) btn.classList.add('active');if(page==='dashboard') renderDashboard();if(page==='report') renderReport()}
+function setLang(lang){localStorage.setItem(LANG_KEY,lang);applyI18n();renderAll()}
+function applyI18n(){document.documentElement.lang=localStorage.getItem(LANG_KEY)||'bg';document.querySelectorAll('[data-i18n]').forEach(el=>el.textContent=t(el.dataset.i18n));byId('langSel').value=localStorage.getItem(LANG_KEY)||'bg';byId('timerNote').placeholder=t('note');byId('logSearch').placeholder=t('journal')+'...';byId('expSearch').placeholder=t('expenses')+'...';['unpaid','partial','paid'].forEach((k,i)=>{byId('cStatus').options[i].text=t(k)})}
+
+function workerName(id){const w=state.workers.find(x=>x.id===id);return w?w.name:'—'}
+function clientName(id){const c=state.clients.find(x=>x.id===id);return c?c.name:'—'}
+function clientCalc(c){const logs=state.logs.filter(l=>l.clientId===c.id);const expenses=state.expenses.filter(e=>e.clientId===c.id);const labor=logs.reduce((s,l)=>s+Number(l.hours)*Number(l.clientRate),0);const wages=logs.reduce((s,l)=>s+Number(l.hours)*Number(l.workerRate),0);const materials=expenses.reduce((s,e)=>s+Number(e.amount),0);const total=labor+materials;const paid=c.status==='paid'?total:c.status==='partial'?Math.min(total,Number(c.partial||0)):0;return {labor,wages,materials,total,paid,due:total-paid,hours:logs.reduce((s,l)=>s+Number(l.hours),0),profit:labor-wages-materials}}
+function totals(){const revenue=state.logs.reduce((s,l)=>s+Number(l.hours)*Number(l.clientRate),0);const wages=state.logs.reduce((s,l)=>s+Number(l.hours)*Number(l.workerRate),0);const expenses=state.expenses.reduce((s,e)=>s+Number(e.amount),0);const due=state.clients.reduce((s,c)=>s+clientCalc(c).due,0);const hours=state.logs.reduce((s,l)=>s+Number(l.hours),0);return {revenue,wages,expenses,due,hours,profit:revenue-wages-expenses}}
+
+function setSelectOptions(){
+  const workerOpts=['<option value="">'+t('worker')+'</option>'].concat(state.workers.map(w=>`<option value="${w.id}">${w.name}${w.type==='boss'?' ⭐':''}</option>`)).join('');
+  const clientOpts=['<option value="">'+t('client')+'</option>'].concat(state.clients.map(c=>`<option value="${c.id}">${c.name}</option>`)).join('');
+  ['lWorker','timerWorker'].forEach(id=>byId(id).innerHTML=workerOpts);
+  ['lClient','eClient','timerClient'].forEach(id=>byId(id).innerHTML=clientOpts);
+}
+function renderWorkers(){const box=byId('workersList');if(!state.workers.length){box.innerHTML=`<div class="empty"><h3>${t('noWorkers')}</h3><p>${t('addFirstWorker')}</p></div>`;return}box.innerHTML=`<div class="grid g3">${state.workers.map(w=>`<div class="card worker-card"><div class="row"><div class="badge">${initials(w.name)}</div><div><div style="font-weight:800">${w.name}</div><div class="muted small">${w.type==='boss'?'⭐ Boss':money(w.rate||0)+'/h'}</div></div></div>${w.note?`<div class="small muted">${w.note}</div>`:''}<div class="row"><button class="btn" onclick="openWorkerModal('${w.id}')">✏️</button><button class="btn btn-danger" onclick="deleteWorker('${w.id}')">🗑</button></div></div>`).join('')}</div>`}
+function renderClients(){const box=byId('clientsList');if(!state.clients.length){box.innerHTML=`<div class="empty"><h3>${t('noClients')}</h3><p>${t('addFirstClient')}</p></div>`;return}box.innerHTML=`<div class="grid g2">${state.clients.map(c=>{const x=clientCalc(c);const st=c.status||'unpaid';const cls=st==='paid'?'ok':st==='partial'?'warn':'bad';return `<div class="card client-card"><div class="row"><div class="badge">${initials(c.name)}</div><div><div style="font-weight:800">${c.name}</div><div class="muted small">${money(c.rate)}/h</div></div><span class="push badge ${cls}">${t(st)}</span></div>${c.note?`<div class="small muted">${c.note}</div>`:''}<div class="grid g3"><div class="card"><div class="small muted">${t('total')}</div><div style="font-weight:800">${money(x.total)}</div></div><div class="card"><div class="small muted">${t('paid')}</div><div style="font-weight:800">${money(x.paid)}</div></div><div class="card"><div class="small muted">${t('remaining')}</div><div style="font-weight:800">${money(x.due)}</div></div></div><div class="row small"><span class="badge">${x.hours.toFixed(2)} h</span><span class="badge">${t('profit')}: ${money(x.profit)}</span></div><div class="row"><button class="btn btn-primary" onclick="openInvoice('${c.id}')">📄 ${t('invoice')}</button><button class="btn" onclick="openClientModal('${c.id}')">✏️</button><button class="btn btn-danger" onclick="deleteClient('${c.id}')">🗑</button></div></div>`}).join('')}</div>`}
+function renderLog(){let rows=[...state.logs].sort((a,b)=>String(b.date).localeCompare(String(a.date)));const q=byId('logSearch').value.trim().toLowerCase();const f=byId('logFrom').value;const to=byId('logTo').value;if(f) rows=rows.filter(r=>r.date>=f);if(to) rows=rows.filter(r=>r.date<=to);if(q) rows=rows.filter(r=>[r.date,r.note,workerName(r.workerId),clientName(r.clientId),r.from,r.to].join(' ').toLowerCase().includes(q));const body=byId('logTable');if(!rows.length){body.innerHTML=`<tr><td colspan="8" class="center muted">${t('noEntries')}</td></tr>`;return}body.innerHTML=rows.map(r=>`<tr><td>${r.date}${r.from&&r.to?`<div class="small muted">${r.from} → ${r.to}</div>`:''}</td><td>${workerName(r.workerId)}</td><td>${clientName(r.clientId)}</td><td><b>${Number(r.hours).toFixed(2)}</b></td><td class="small muted">W ${money(r.workerRate)}<br>C ${money(r.clientRate)}</td><td>${money(Number(r.hours)*Number(r.workerRate))}<br><span class="small" style="color:var(--green3)">${money(Number(r.hours)*Number(r.clientRate))}</span></td><td class="small muted">${r.note||'—'}</td><td><div class="row"><button class="mini-btn" onclick="openLogModal('${r.id}')">✏️</button><button class="mini-btn" onclick="dupLog('${r.id}')">⧉</button><button class="mini-btn btn-danger" onclick="deleteLog('${r.id}')">🗑</button></div></td></tr>`).join('')}
+function renderExpenses(){let rows=[...state.expenses].sort((a,b)=>String(b.date).localeCompare(String(a.date)));const q=byId('expSearch').value.trim().toLowerCase();const f=byId('expFrom').value;const to=byId('expTo').value;if(f) rows=rows.filter(r=>r.date>=f);if(to) rows=rows.filter(r=>r.date<=to);if(q) rows=rows.filter(r=>[r.date,r.desc,r.note,clientName(r.clientId)].join(' ').toLowerCase().includes(q));const body=byId('expTable');if(!rows.length){body.innerHTML=`<tr><td colspan="6" class="center muted">${t('noExpenses')}</td></tr>`;return}body.innerHTML=rows.map(r=>`<tr><td>${r.date}</td><td>${clientName(r.clientId)}</td><td>${r.desc||'—'}</td><td>${money(r.amount)}</td><td class="small muted">${r.note||'—'}</td><td><div class="row"><button class="mini-btn" onclick="openExpenseModal('${r.id}')">✏️</button><button class="mini-btn btn-danger" onclick="deleteExpense('${r.id}')">🗑</button></div></td></tr>`).join('')}
+function renderDashboard(){const m=byId('dashMonth');const months=[''].concat([...new Set(state.logs.map(l=>String(l.date).slice(0,7)).concat(state.expenses.map(e=>String(e.date).slice(0,7))))].sort().reverse());m.innerHTML=months.map(v=>`<option value="${v}">${v||'Всички'}</option>`).join('');const sel=m.value;let logs=state.logs,expenses=state.expenses;if(sel){logs=logs.filter(l=>String(l.date).startsWith(sel));expenses=expenses.filter(e=>String(e.date).startsWith(sel))}const revenue=logs.reduce((s,l)=>s+Number(l.hours)*Number(l.clientRate),0);const wages=logs.reduce((s,l)=>s+Number(l.hours)*Number(l.workerRate),0);const exp=expenses.reduce((s,e)=>s+Number(e.amount),0);const due=state.clients.reduce((s,c)=>s+clientCalc(c).due,0);const k=[['hours',logs.reduce((s,l)=>s+Number(l.hours),0).toFixed(2)],['amounts',money(revenue)],['expenses',money(exp)],['profit',money(revenue-wages-exp)]];byId('kpis').innerHTML=k.map(([kk,v])=>`<div class="card kpi"><div class="k">${t(kk)}</div><div class="v">${v}</div></div>`).join('');byId('recentLogs').innerHTML=state.logs.length?`<div class="list">${[...state.logs].sort((a,b)=>String(b.date).localeCompare(String(a.date))).slice(0,5).map(l=>`<div class="card"><div class="row"><b>${l.date}</b><span class="push badge">${Number(l.hours).toFixed(2)} h</span></div><div class="small muted">${workerName(l.workerId)} → ${clientName(l.clientId)}</div></div>`).join('')}</div>`:`<div class="empty">${t('noEntries')}</div>`;byId('recentExpenses').innerHTML=state.expenses.length?`<div class="list">${[...state.expenses].sort((a,b)=>String(b.date).localeCompare(String(a.date))).slice(0,5).map(e=>`<div class="card"><div class="row"><b>${e.date}</b><span class="push badge">${money(e.amount)}</span></div><div class="small muted">${clientName(e.clientId)} • ${e.desc||'—'}</div></div>`).join('')}</div>`:`<div class="empty">${t('noExpenses')}</div>`;renderTimerStatus();}
+function setReport(type){state.report=type;save();renderReport()}
+function renderReport(){const top=totals();byId('reportTop').innerHTML=[['amounts',money(top.revenue)],['expenses',money(top.expenses)],['hours',top.hours.toFixed(2)],['remaining',money(top.due)]].map(([k,v])=>`<div class="card kpi"><div class="k">${t(k)}</div><div class="v">${v}</div></div>`).join('');byId('repClientsBtn').className='btn'+(state.report==='clients'?' btn-primary':'');byId('repWorkersBtn').className='btn'+(state.report==='workers'?' btn-primary':'');byId('repExpBtn').className='btn'+(state.report==='expenses'?' btn-primary':'');if(state.report==='workers'){const map={};state.logs.forEach(l=>{map[l.workerId]=map[l.workerId]||{h:0,d:0,c:0};map[l.workerId].h+=Number(l.hours);map[l.workerId].d+=Number(l.hours)*Number(l.workerRate);map[l.workerId].c++});const rows=Object.entries(map).sort((a,b)=>b[1].d-a[1].d);byId('reportBody').innerHTML=`<div class="table-wrap"><table><thead><tr><th>${t('worker')}</th><th>${t('hours')}</th><th>${t('amount')}</th><th>#</th></tr></thead><tbody>${rows.length?rows.map(([id,v])=>`<tr><td>${workerName(id)}</td><td>${v.h.toFixed(2)}</td><td>${money(v.d)}</td><td>${v.c}</td></tr>`).join(''):`<tr><td colspan="4" class="center muted">${t('noEntries')}</td></tr>`}</tbody></table></div>`;return}if(state.report==='expenses'){byId('reportBody').innerHTML=`<div class="table-wrap"><table><thead><tr><th>${t('date')}</th><th>${t('client')}</th><th>${t('description')}</th><th>${t('amount')}</th></tr></thead><tbody>${state.expenses.length?state.expenses.map(e=>`<tr><td>${e.date}</td><td>${clientName(e.clientId)}</td><td>${e.desc||'—'}</td><td>${money(e.amount)}</td></tr>`).join(''):`<tr><td colspan="4" class="center muted">${t('noExpenses')}</td></tr>`}</tbody></table></div>`;return}byId('reportBody').innerHTML=`<div class="table-wrap"><table><thead><tr><th>${t('client')}</th><th>${t('amounts')}</th><th>${t('expenses')}</th><th>${t('profit')}</th><th>${t('status')}</th><th>${t('remaining')}</th></tr></thead><tbody>${state.clients.length?state.clients.map(c=>{const x=clientCalc(c);return `<tr><td>${c.name}</td><td>${money(x.total)}</td><td>${money(x.materials)}</td><td>${money(x.profit)}</td><td>${t(c.status||'unpaid')}</td><td>${money(x.due)}</td></tr>`}).join(''):`<tr><td colspan="6" class="center muted">${t('noClients')}</td></tr>`}</tbody></table></div>`}
+
+function openWorkerModal(id=''){byId('wId').value='';byId('wName').value='';byId('wType').value='worker';byId('wRate').value='';byId('wNote').value='';if(id){const w=state.workers.find(x=>x.id===id);if(!w) return;byId('wId').value=w.id;byId('wName').value=w.name;byId('wType').value=w.type;byId('wRate').value=w.rate??'';byId('wNote').value=w.note||''}toggleWorkerRate();openModal('workerModal')}
+function toggleWorkerRate(){byId('wRateWrap').classList.toggle('hidden',byId('wType').value==='boss')}
+function saveWorker(){const id=byId('wId').value,name=byId('wName').value.trim(),type=byId('wType').value,rate=parseFloat(byId('wRate').value||'0'),note=byId('wNote').value.trim();if(!name) return alert(t('name'));if(type==='worker'&&!rate) return alert(t('hourRate'));const item={id:id||uid(),name,type,rate:type==='boss'?null:rate,note};const i=state.workers.findIndex(x=>x.id===item.id);if(i>=0) state.workers[i]=item; else state.workers.push(item);save();setSelectOptions();renderWorkers();renderDashboard();closeModal('workerModal')}
+function deleteWorker(id){if(!confirm('Delete?')) return;state.workers=state.workers.filter(x=>x.id!==id);state.logs=state.logs.filter(x=>x.workerId!==id);save();setSelectOptions();renderAll()}
+
+function openClientModal(id=''){byId('cId').value='';byId('cName').value='';byId('cRate').value='';byId('cStatus').value='unpaid';byId('cPartial').value='';byId('cNote').value='';if(id){const c=state.clients.find(x=>x.id===id);if(!c) return;byId('cId').value=c.id;byId('cName').value=c.name;byId('cRate').value=c.rate;byId('cStatus').value=c.status||'unpaid';byId('cPartial').value=c.partial||'';byId('cNote').value=c.note||''}togglePartialWrap();openModal('clientModal')}
+function togglePartialWrap(){byId('partialWrap').classList.toggle('hidden',byId('cStatus').value!=='partial')}
+function saveClient(){const id=byId('cId').value,name=byId('cName').value.trim(),rate=parseFloat(byId('cRate').value||'0'),status=byId('cStatus').value,partial=parseFloat(byId('cPartial').value||'0'),note=byId('cNote').value.trim();if(!name) return alert(t('name'));if(!rate) return alert(t('clientRate'));const item={id:id||uid(),name,rate,status,partial:status==='partial'?partial:0,note};const i=state.clients.findIndex(x=>x.id===item.id);if(i>=0) state.clients[i]=item; else state.clients.push(item);save();setSelectOptions();renderClients();renderDashboard();renderReport();closeModal('clientModal')}
+function deleteClient(id){if(!confirm('Delete?')) return;state.clients=state.clients.filter(x=>x.id!==id);state.logs=state.logs.filter(x=>x.clientId!==id);state.expenses=state.expenses.filter(x=>x.clientId!==id);save();setSelectOptions();renderAll()}
+
+function syncClientRate(){const c=state.clients.find(x=>x.id===byId('lClient').value);if(c) byId('lClientRate').value=c.rate;syncWorkerRate()}
+function syncWorkerRate(){const w=state.workers.find(x=>x.id===byId('lWorker').value);const c=state.clients.find(x=>x.id===byId('lClient').value);if(w){byId('lWorkerRate').value=w.type==='boss'?(c?c.rate:''):(w.rate||'')}}
+function calcHours(){const f=byId('lFrom').value,to=byId('lTo').value;if(!f||!to) return;let a=f.split(':').map(Number),b=to.split(':').map(Number);let mins=(b[0]*60+b[1])-(a[0]*60+a[1]);if(mins<0) mins+=24*60;let h=mins/60;if(state.settings.pauseOn) h=Math.max(0,h-(Number(state.settings.pauseMin||0)/60));byId('lHours').value=h.toFixed(2)}
+function openLogModal(id=''){setSelectOptions();byId('lId').value='';byId('lDate').value=today();byId('lClient').value='';byId('lWorker').value='';byId('lClientRate').value='';byId('lWorkerRate').value='';byId('lHours').value='';byId('lFrom').value='';byId('lTo').value='';byId('lNote').value='';if(id){const l=state.logs.find(x=>x.id===id);if(!l) return;byId('lId').value=l.id;byId('lDate').value=l.date;byId('lClient').value=l.clientId;byId('lWorker').value=l.workerId;byId('lClientRate').value=l.clientRate;byId('lWorkerRate').value=l.workerRate;byId('lHours').value=l.hours;byId('lFrom').value=l.from||'';byId('lTo').value=l.to||'';byId('lNote').value=l.note||''}openModal('logModal')}
+function saveLog(){const id=byId('lId').value,item={id:id||uid(),date:byId('lDate').value,clientId:byId('lClient').value,workerId:byId('lWorker').value,clientRate:parseFloat(byId('lClientRate').value||'0'),workerRate:parseFloat(byId('lWorkerRate').value||'0'),hours:parseFloat(byId('lHours').value||'0'),from:byId('lFrom').value,to:byId('lTo').value,note:byId('lNote').value.trim()};if(!item.date||!item.clientId||!item.workerId||!item.hours) return alert('Fill all');const i=state.logs.findIndex(x=>x.id===item.id);if(i>=0) state.logs[i]=item; else state.logs.push(item);save();renderAll();closeModal('logModal')}
+function deleteLog(id){if(!confirm('Delete?')) return;state.logs=state.logs.filter(x=>x.id!==id);save();renderAll()}
+function dupLog(id){const l=state.logs.find(x=>x.id===id);if(!l) return;state.logs.push({...l,id:uid()});save();renderAll()}
+
+function openExpenseModal(id=''){setSelectOptions();byId('eId').value='';byId('eDate').value=today();byId('eClient').value='';byId('eDesc').value='';byId('eAmount').value='';byId('eNote').value='';if(id){const e=state.expenses.find(x=>x.id===id);if(!e) return;byId('eId').value=e.id;byId('eDate').value=e.date;byId('eClient').value=e.clientId;byId('eDesc').value=e.desc||'';byId('eAmount').value=e.amount;byId('eNote').value=e.note||''}openModal('expenseModal')}
+function saveExpense(){const id=byId('eId').value,item={id:id||uid(),date:byId('eDate').value,clientId:byId('eClient').value,desc:byId('eDesc').value.trim(),amount:parseFloat(byId('eAmount').value||'0'),note:byId('eNote').value.trim()};if(!item.date||!item.clientId||!item.amount) return alert('Fill all');const i=state.expenses.findIndex(x=>x.id===item.id);if(i>=0) state.expenses[i]=item; else state.expenses.push(item);save();renderAll();closeModal('expenseModal')}
+function deleteExpense(id){if(!confirm('Delete?')) return;state.expenses=state.expenses.filter(x=>x.id!==id);save();renderAll()}
+
+function startTimer(){const clientId=byId('timerClient').value,workerId=byId('timerWorker').value,note=byId('timerNote').value.trim();if(!clientId||!workerId) return alert('Choose client and worker');if(localStorage.getItem(TIMER_KEY)) return alert('Timer already active');localStorage.setItem(TIMER_KEY,JSON.stringify({clientId,workerId,note,startedAt:new Date().toISOString()}));renderTimerStatus()}
+function stopTimer(){const raw=localStorage.getItem(TIMER_KEY);if(!raw) return alert('No timer');const tmr=JSON.parse(raw);const w=state.workers.find(x=>x.id===tmr.workerId),c=state.clients.find(x=>x.id===tmr.clientId);if(!w||!c){localStorage.removeItem(TIMER_KEY);renderTimerStatus();return}let hrs=(Date.now()-new Date(tmr.startedAt).getTime())/36e5;if(state.settings.pauseOn) hrs=Math.max(0,hrs-(Number(state.settings.pauseMin||0)/60));state.logs.push({id:uid(),date:new Date(tmr.startedAt).toISOString().slice(0,10),clientId:c.id,workerId:w.id,clientRate:c.rate,workerRate:w.type==='boss'?c.rate:w.rate,hours:Number(hrs.toFixed(2)),from:timeHM(tmr.startedAt),to:timeHM(new Date()),note:tmr.note||''});localStorage.removeItem(TIMER_KEY);save();renderAll()}
+function renderTimerStatus(){const raw=localStorage.getItem(TIMER_KEY),el=byId('timerStatus');if(!raw){el.textContent=t('noTimer');el.className='badge';return}const tmr=JSON.parse(raw);el.textContent=t('activeTimer')+' • '+timeHM(tmr.startedAt);el.className='badge ok'}
+
+function openInvoice(clientId){const c=state.clients.find(x=>x.id===clientId);if(!c) return;const x=clientCalc(c);const logs=state.logs.filter(l=>l.clientId===c.id).sort((a,b)=>String(a.date).localeCompare(String(b.date)));const exps=state.expenses.filter(e=>e.clientId===c.id).sort((a,b)=>String(a.date).localeCompare(String(b.date)));const html=['<div class="invoice-head">'+t('invoice')+'</div>',`<div><b>${t('client')}:</b> ${c.name}</div>`,`<div><b>${t('date')}:</b> ${today()}</div>`,`<hr>`,'<div><b>Labor</b></div>',logs.length?logs.map(l=>`<div class="invoice-row"><div>${l.date} • ${Number(l.hours).toFixed(2)} h × ${money(l.clientRate)}</div><div>${money(Number(l.hours)*Number(l.clientRate))}</div></div>`).join(''):`<div class="invoice-row"><div>—</div><div>0</div></div>`,'<div><b>Materials</b></div>',exps.length?exps.map(e=>`<div class="invoice-row"><div>${e.date} • ${e.desc||'—'}</div><div>${money(e.amount)}</div></div>`).join(''):`<div class="invoice-row"><div>—</div><div>0</div></div>`,`<div class="invoice-row"><div>${t('status')}</div><div>${t(c.status||'unpaid')}</div></div>`,`<div class="invoice-row"><div>${t('paid')}</div><div>${money(x.paid)}</div></div>`,`<div class="invoice-total">${t('remaining')}: ${money(x.due)}</div>`].join('');byId('invoiceBox').innerHTML=html;currentInvoiceText=`${t('invoice')} - ${c.name}\n${t('remaining')}: ${money(x.due)}`;byId('shareInvoiceBtn').onclick=()=>{if(navigator.share){navigator.share({title:t('invoice')+' - '+c.name,text:currentInvoiceText}).catch(()=>{})}else{navigator.clipboard.writeText(currentInvoiceText);alert('Copied')}};openModal('invoiceModal')}
+function printInvoice(){const w=window.open('','_blank');if(!w) return;const doc='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Invoice</title><meta name="viewport" content="width=device-width, initial-scale=1"><style>body{font-family:Arial,sans-serif;padding:24px;color:#173223}.invoice-head{font-size:28px;font-weight:800;color:#1f7a35;margin-bottom:12px}.invoice-row{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid #e4efe6}.invoice-total{margin-top:14px;padding:14px;border-radius:16px;background:#edf8ef;font-size:20px;font-weight:800;text-align:right}</style></head><body>'+byId('invoiceBox').innerHTML+'</body></html>';w.document.open();w.document.write(doc);w.document.close();setTimeout(()=>{w.focus();w.print()},250)}
+
+function saveSettings(){state.settings.pauseOn=byId('pauseOn').checked;state.settings.pauseMin=parseInt(byId('pauseMin').value||'0',10);save()}
+function exportJSON(){const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='workflow-offline-backup.json';a.click()}
+function importJSON(e){const f=e.target.files[0];if(!f) return;const r=new FileReader();r.onload=ev=>{try{const d=JSON.parse(ev.target.result);if(d&&d.workers&&d.clients&&d.logs&&d.expenses){state=d;save();setSelectOptions();renderAll();alert('Imported')}}catch(err){alert('Import error')}};r.readAsText(f);e.target.value=''}
+function exportCSV(type){let rows=[];if(type==='logs'){rows=[['date','worker','client','hours','workerRate','clientRate','workerAmount','clientAmount','note'],...state.logs.map(l=>[l.date,workerName(l.workerId),clientName(l.clientId),l.hours,l.workerRate,l.clientRate,(l.hours*l.workerRate).toFixed(2),(l.hours*l.clientRate).toFixed(2),l.note||''])]}else{rows=[['date','client','desc','amount','note'],...state.expenses.map(e=>[e.date,clientName(e.clientId),e.desc||'',e.amount,e.note||''])]}const csv='\ufeff'+rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(';')).join('\n');const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='workflow-'+type+'.csv';a.click()}
+function clearAll(){if(!confirm('Delete all local data?')) return;localStorage.removeItem(KEY);localStorage.removeItem(TIMER_KEY);state={workers:[],clients:[],logs:[],expenses:[],settings:{pauseOn:false,pauseMin:30},report:'clients'};renderAll()}
+
+function renderAll(){save();setSelectOptions();renderWorkers();renderClients();renderLog();renderExpenses();renderDashboard();renderReport();byId('pauseOn').checked=!!state.settings.pauseOn;byId('pauseMin').value=state.settings.pauseMin??30}
+
+(function init(){load();applyI18n();setSelectOptions();renderAll()})();
+</script>
+
+
+<script id="pwa-register">
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('./sw.js').catch(function(err) { console.warn('SW registration failed', err); });
+  });
+}
+</script>
+</body>
+</html>
