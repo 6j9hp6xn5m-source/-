@@ -1,0 +1,19 @@
+{
+  "name": "WorkFlow Offline",
+  "short_name": "WorkFlow",
+  "description": "Offline workflow manager with local storage, weekly reports, multi-worker journal entries and PWA support.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f4fbf5",
+  "theme_color": "#2f9e44",
+  "lang": "bg",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
